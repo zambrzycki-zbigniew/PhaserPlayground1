@@ -1,0 +1,111 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Phaser Playground</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+    var config = {
+        type: Phaser.AUTO,
+        width: 768,
+        height: 576,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 300 },
+                debug: false
+            }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
+
+    var game = new Phaser.Game(config);
+    var background;
+    var wsad;
+    var XYAcc=[0,0];
+    var decayMult = 0.97;
+    var decayMargin = 2;
+    var acceleration = 0.1;
+    var sum = 0;
+
+    function preload ()
+    {
+        this.load.image('background-tile', 'assets/clay3.png');
+    }
+
+    function create ()
+    {
+        background = this.add.tileSprite(400, 300, 800, 600, 'background-tile');
+        console.log(background);
+        wsad = this.input.keyboard.addKeys('W,S,A,D');
+    }
+
+    function update ()
+    {
+        if (wsad.W.isDown) {
+            background.tilePositionY+=XYAcc[0];
+            XYAcc[0] = (XYAcc[0]>-10) ? XYAcc[0]-acceleration : -10;
+            if (XYAcc[0]>0) XYAcc[0]=XYAcc[0]*decayMult;;
+        }
+        if (wsad.S.isDown) {
+            background.tilePositionY+=XYAcc[0];
+            XYAcc[0] = (XYAcc[0]<10) ? XYAcc[0]+acceleration : 10;
+            if (XYAcc[0]<0) XYAcc[0]=XYAcc[0]*decayMult;;
+        }
+        if (wsad.A.isDown) {
+            background.tilePositionX+=XYAcc[1];
+            XYAcc[1] = (XYAcc[1]>-10) ? XYAcc[1]-acceleration : -10;
+            if (XYAcc[1]>0) XYAcc[1]=XYAcc[1]*decayMult;;
+        }
+        if (wsad.D.isDown) {
+            background.tilePositionX+=XYAcc[1];
+            XYAcc[1] = (XYAcc[1]<10) ? XYAcc[1]+acceleration : 10;
+            if (XYAcc[1]<0) XYAcc[1]=XYAcc[1]*decayMult;;
+        }
+        if (XYAcc[0]!=0 && !(wsad.W.isDown) && !(wsad.S.isDown)) {
+            XYAcc[0]=XYAcc[0]*decayMult;
+            background.tilePositionY+=XYAcc[0];
+            if (XYAcc[0]<decayMargin && XYAcc[0]>-decayMargin) {
+                sum+=XYAcc[0];
+                console.log("sum "+sum);
+                if (XYAcc[0]<decayMargin/1000 && XYAcc[0]>-decayMargin/1000) {
+                    XYAcc[0]=0;
+                    sum = 0;
+                }
+            }
+            console.log("background.tilePositionY "+background.tilePositionY);
+        }
+        if (XYAcc[1]!=0 && !(wsad.A.isDown) && !(wsad.D.isDown)) {
+            XYAcc[1]=XYAcc[1]*decayMult;
+            background.tilePositionX+=XYAcc[1];
+            if (XYAcc[1]<decayMargin && XYAcc[0]>-decayMargin) {
+                sum+=XYAcc[1];
+                console.log("sum "+sum);
+                if (XYAcc[1]<decayMargin/1000 && XYAcc[1]>-decayMargin/1000) {
+                    XYAcc[1]=0;
+                    sum = 0;
+                }
+            }
+            console.log("background.tilePositionX "+background.tilePositionX);
+        }
+    }
+
+    function snapToGrid() {}
+
+</script>
+
+</body>
+</html>
